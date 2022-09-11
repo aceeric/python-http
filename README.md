@@ -35,9 +35,23 @@ while true; do curl -H "X-Frobozz: $RANDOM" http://localhost:8080; sleep 1s; don
 2022-09-10 22:14:36.468997 -- python-http-np7s2 -- 10.200.127.200
 ```
 
+## Create a NodePort service
+
+The project has a NodePort manifest. It's not included in the Kustomization file.
+```
+kubectl apply -f nodeport-service.yaml
+```
+
+## Access the server on a node port
+This assumes your node is directly reachable from your desktop...
+```
+NODEIP=$(kubectl get nodes -ojsonpath='{.items[0].status.addresses[0].address}')
+curl -k -H "X-Frobozz: $RANDOM" http://$NODEIP:30080
+```
+
 ## If an Ingress controller is present
 
-If you are running an ingress controller, you can access the service from outside the cluster. The example below was run against a single-node Kubernetes cluster running in a VM provisioned by [Desktop Kubernetes](https://github.com/aceeric/desktop-kubernetes). The single node VM has IP address 192.168.56.200. [Traefik](https://doc.traefik.io/traefik/getting-started/quick-start-with-kubernetes/) was installed as a `NodePort` service on node port 30080 to serve port 80 traffic into the cluster:
+The example below was run against a single-node Kubernetes cluster running in a VM provisioned by [Desktop Kubernetes](https://github.com/aceeric/desktop-kubernetes). The single node VM has IP address 192.168.56.200. [Traefik](https://doc.traefik.io/traefik/getting-started/quick-start-with-kubernetes/) was installed as a `NodePort` service on node port 30080 to serve port 80 traffic into the cluster:
 
 ```
 $ kubectl -n traefik get svc
