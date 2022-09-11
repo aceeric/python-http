@@ -1,0 +1,35 @@
+resources:
+- namespace.yaml
+- daemonset.yaml
+- service.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+- name: python-http
+  namespace: python-http
+  files:
+  - server.py
+
+patches:
+- target:
+    kind: DaemonSet
+    name: python-http
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/env/0/value
+      value: "80"
+    - op: replace
+      path: /spec/template/spec/containers/0/env/1/value
+      value: "False"
+    - op: replace
+      path: /spec/template/spec/containers/0/ports/0/containerPort
+      value: 80
+- target:
+    kind: Service
+    name: python-http
+  patch: |-
+    - op: replace
+      path: /spec/ports/0/port
+      value: 80

@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: python-http
+  namespace: python-http
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: /python-http
+        backend:
+          service:
+            name: python-http
+            port:
+              name: web

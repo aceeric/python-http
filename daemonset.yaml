@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: python-http
+  namespace: python-http
+spec:
+  selector:
+    matchLabels:
+      app: python-http
+  template:
+    metadata:
+      labels:
+        app: python-http
+    spec:
+      initContainers:
+      - name: gen-cert
+        image: docker.io/openjdk:20-slim-buster
+        command:
+        - openssl
+        - req
+        - -new
+        - -x509
+        - -keyout
+        - /etc/certs/server.pem
+        - -out
+        - /etc/certs/server.pem
+        - -days
+        - '365'
+        - -nodes
+        - -subj
+        - /CN=Frobozz
+        resources:
+          requests:
+            cpu: 250m
+        volumeMounts:
+        - mountPath: /etc/certs
+          name: certs
+      containers:
+      - name: python-http
+        env:
+        - name: SERVER_PORT
+          value: "80"
+        - name: IS_HTTPS
+          value: "False"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        ports:
+        - name: web
+          containerPort: 80
+        image: docker.io/python:3.9.14-alpine3.15
+        command:
+        - python
+        - /var/run/server/server.py
+        resources:
+          requests:
+            cpu: 250m
+        volumeMounts:
+        - mountPath: var/run/server
+          name: server
+        - mountPath: /etc/certs
+          name: certs
+      volumes:
+      - name: certs
+        emptyDir: {}
+      - name: server
+        configMap:
+          name: python-http
