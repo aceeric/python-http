@@ -1,0 +1,11 @@
+ingress:
+  enabled: true
+  className: nginx
+
+service:
+  type: ClusterIP
+  port: 80
+
+isHttps: true
+
+nodeport: false

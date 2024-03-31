@@ -2,7 +2,8 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: python-http
-  namespace: python-http
+  labels:
+    {{- include "python-http.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
@@ -13,7 +14,7 @@ spec:
         app: python-http
     spec:
       initContainers:
-      - name: gen-cert
+      - name: init
         image: docker.io/openjdk:20-slim-buster
         command:
         - openssl
@@ -39,14 +40,14 @@ spec:
       - name: python-http
         env:
         - name: SERVER_PORT
-          value: "80"
+          value: "{{ .Values.service.port }}"
         - name: IS_HTTPS
-          value: "False"
+          value: "{{ .Values.isHttps }}"
         - name: PYTHONUNBUFFERED
           value: "1"
         ports:
-        - name: web
-          containerPort: 80
+        - name: http
+          containerPort: {{ .Values.service.port }}
         image: docker.io/python:3.9.14-alpine3.15
         command:
         - python
