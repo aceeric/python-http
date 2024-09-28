@@ -13,6 +13,7 @@ spec:
       labels:
         app: python-http
     spec:
+      {{- if .Values.isHttps }}
       initContainers:
       - name: init
         image: docker.io/openjdk:20-slim-buster
@@ -36,6 +37,7 @@ spec:
         volumeMounts:
         - mountPath: /etc/certs
           name: certs
+      {{- end }}
       containers:
       - name: python-http
         env:
